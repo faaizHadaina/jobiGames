@@ -1,0 +1,46 @@
+{
+  "name": "jobigames-backend",
+  "version": "1.0.0",
+  "description": "A backend for Jobi Games",
+  "main": "app.js",
+  "scripts": {
+    "test": "npm",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faaiz-hadaina/jobi-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/faaiz-hadaina/jobi-server.git"
+  },
+  "homepage": "https://github.com/faaiz-hadaina/jobi-server#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "email-templates": "^11.1.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "http": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.7.0",
+    "nodemailer": "^6.9.8",
+    "nodemon": "^3.0.2",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "peer": "^1.0.2",
+    "sequelize": "^6.35.2",
+    "socket.io": "^4.7.3",
+    "xss-clean": "^0.1.4"
+  }
+}

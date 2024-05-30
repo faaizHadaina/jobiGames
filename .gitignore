@@ -1,0 +1,33 @@
+# Comment lines start with a '#'
+# Ignore all .log files
+*.log
+
+# Ignore specific files
+todo.txt
+config.env
+
+# Ignore all files in a specific directory
+node_modules/
+temp/
+
+# Ignore files in any directory named build
+build/
+
+# Ignore files with specific names regardless of directory
+.DS_Store
+Thumbs.db
+
+# Ignore all .txt files in the doc directory
+doc/*.txt
+
+# Exclude specific files that would otherwise be ignored
+!important.log
+
+# Ignore files based on patterns
+*.temp
+*.bak
+*~
+
+# Ignore all .pyc files except subdir/foo.pyc
+*.pyc
+!subdir/foo.pyc
