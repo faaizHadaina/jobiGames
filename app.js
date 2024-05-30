@@ -64,7 +64,7 @@ const peerServer = ExpressPeerServer(httpServer, { path: '/' });
 app.use('/peerjs', peerServer);
 
 app.get('/', (req, res) => {
-    res.send('Welcome to JobiGames Api');
+    res.send('Welcome to JobiGames API');
 });
 
 const PORT = process.env.PORT || 5000;

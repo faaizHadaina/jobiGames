@@ -1,8 +1,6 @@
 const crypto = require("crypto");
 const adminChargesCtrl = require("../../controllers/admin_chargesCtrl");
 
-const crypto = require("crypto");
-
 async function createAdminCharges(users, amount) {
   if (!Array.isArray(users)) {
     users = [users]; 

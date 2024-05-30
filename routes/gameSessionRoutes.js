@@ -11,6 +11,6 @@ router.get('/fetchSession/:room_id/:game_id', auth, gameSessionCtrl.fetchGameSes
 router.get('/endGameSession/:session_id/:user_id', auth, gameSessionCtrl.endGameSession);
 router.post('/sendReplayRequest/:session_id', auth, gameSessionCtrl.sendReplayRequest);
 router.post('/acceptReplayRequest/:session_id', auth, gameSessionCtrl.acceptReplayRequest);
-router.delete('/deleteGameSession/:room_id/:game_id', auth, gameSessionCtrl.deleteGameSession);
+router.delete('/deleteGameSession/:room_pass/:game_id', auth, gameSessionCtrl.deleteGameSession);
 
 module.exports = router;
