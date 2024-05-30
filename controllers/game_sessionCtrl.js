@@ -126,7 +126,7 @@ const gameSessionCtrl = {
 
   deleteGameSession: async (req, res, next) => {
     try {
-      const { room_id, game_id } = req.params;
+      const { room_pass, game_id } = req.params;
       const user_id = req.user.sn;
 
       const user = await Users.findOne({ where: { sn: user_id } });
@@ -137,12 +137,12 @@ const gameSessionCtrl = {
       }
 
       const room = await GameSessions.findOne({
-        where: { room_id, game_id, user_id },
+        where: { room_pass, game_id, user_id },
       });
 
       if (room && (room.status === "Waiting" || room.opponent_id === null)) {
         await GameSessions.destroy({
-          where: { room_id, game_id, user_id },
+          where: { room_pass, game_id, user_id },
         });
 
         res
@@ -184,7 +184,7 @@ const gameSessionCtrl = {
         await opponent.update({ balance: newBalance });
 
         await GameSessions.destroy({
-          where: { room_id, game_id, user_id },
+          where: { room_pass, game_id, user_id },
         });
 
         res.status(200).json({

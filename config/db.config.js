@@ -1,7 +1,7 @@
 module.exports = {
     HOST: "localhost",
     USER: "jobiGames_user",  //jobiusr
-    PASSWORD: "jobiGames_pwd", //Destination1@@
+    PASSWORD: "Destination12@@", //Destination1@@ jobiGames_pwd
     DB: "jobiusers", //jobi_db
     dialect: "mysql",
     pool: {
