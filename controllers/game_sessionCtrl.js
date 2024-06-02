@@ -137,12 +137,12 @@ const gameSessionCtrl = {
       }
 
       const room = await GameSessions.findOne({
-        where: { room_id, game_id },
+        where: { room_pass: room_id, game_id },
       });
 
       if (room && (room.status === "Waiting" || room.opponent_id === null)) {
         await GameSessions.destroy({
-          where: { room_id, game_id },
+          where: { room_pass: room_id, game_id },
         });
 
         res
@@ -184,7 +184,7 @@ const gameSessionCtrl = {
         await opponent.update({ balance: newBalance });
 
         await GameSessions.destroy({
-          where: { room_pass, game_id },
+          where: { room_pass: room_id, game_id },
         });
 
         res.status(200).json({
