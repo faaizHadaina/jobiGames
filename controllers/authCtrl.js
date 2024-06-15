@@ -385,7 +385,41 @@ const authCtrl = {
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
     }
-  },  
+  },
+
+  destroyAccount: async (req, res, next) => {
+    try {
+      const { email, password } = req.query;
+  
+      // Find the user by email
+      const user = await Users.findOne({ where: { email } });
+  
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+  
+      const decodedStoredPassword = Buffer.from(
+        user.password,
+        "base64"
+      ).toString("utf-8");
+      let isMatch = password === decodedStoredPassword;
+  
+      if (!isMatch) {
+        return res.status(401).json({ success: false, message: "Incorrect password" });
+      }
+  
+      // Delete the user if the password is correct
+      const result = await Users.destroy({ where: { email } });
+  
+      if (result) {
+        res.status(200).json({ success: true, message: "User deleted successfully" });
+      } else {
+        res.status(500).json({ success: false, message: "Failed to delete user" });
+      }
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
 };
 
 module.exports = authCtrl;
