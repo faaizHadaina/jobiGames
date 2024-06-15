@@ -374,8 +374,8 @@ const authCtrl = {
   },
   deleteAccount: async (req, res, next) => {
     try {
-      const user = await Users.deleteOne({ where: { sn: req.user.sn } });
-      if (user) {
+      const result = await Users.destroy({ where: { sn: req.user.sn } });
+      if (result) {
         res
           .status(200)
           .json({ success: true, message: "User deleted successfully" });
@@ -385,7 +385,7 @@ const authCtrl = {
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
     }
-  },
+  },  
 };
 
 module.exports = authCtrl;
