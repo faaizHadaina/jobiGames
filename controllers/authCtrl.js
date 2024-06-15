@@ -372,6 +372,20 @@ const authCtrl = {
       }
     }
   },
+  deleteAccount: async (req, res, next) => {
+    try {
+      const user = await Users.deleteOne({ where: { sn: req.user.sn } });
+      if (user) {
+        res
+          .status(200)
+          .json({ success: true, message: "User deleted successfully" });
+      } else {
+        res.status(404).json({ success: false, message: "User not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
 };
 
 module.exports = authCtrl;

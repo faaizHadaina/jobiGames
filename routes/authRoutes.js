@@ -12,5 +12,6 @@ router.post('/forgotPassword/:id', authCtrl.forgotPassword);
 router.put('/changePassword', auth, authCtrl.changePassword);
 router.post('/resetPassword', authCtrl.resetPassword);
 router.post('/refreshToken', auth, authCtrl.refreshToken);
+router.delete('/delete', auth, authCtrl.deleteAccount)
 
 module.exports = router;
