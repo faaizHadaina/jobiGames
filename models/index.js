@@ -36,5 +36,6 @@ db.mygames          = require('./my_games.model')(sequelize, Sequelize)
 db.onlineusers      = require('./online_users.model')(sequelize, Sequelize)
 db.transactions     = require('./transactions.model')(sequelize, Sequelize)
 db.withdrawrequest  = require('./withdrawal_request.model')(sequelize, Sequelize)
+db.wallet           = require('./wallet.model')(sequelize, Sequelize)
 
 module.exports = db;
