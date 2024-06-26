@@ -49,7 +49,7 @@ const authCtrl = {
       });
 
       const { password: _, ...userResponse } = createdUser.get({ plain: true });
-      //await giroService.createVirtualAccount(fullname, createdUser.sn);
+      await giroService.createVirtualAccount(fullname, email, phone, createdUser.sn);
 
       return res.status(201).json({
         user: userResponse,

@@ -3,6 +3,13 @@ require('dotenv').config();
 const model = require("../models");
 const Wallet = model.wallet;
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 3000; 
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function generateRandomReference(length = 20) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let reference = '';
@@ -12,175 +19,175 @@ function generateRandomReference(length = 20) {
     return reference;
 }
 
-
 const giroService = {
-    createVirtualAccount: async (accountName, user_id) => {
+    createVirtualAccount: async (accountName, email, phone, user_id) => {
         const url = `${process.env.GIRO_URL}/virtual-accounts`;
         const apiKey = process.env.GIRO_KEY;
         const payload = {
-            accountName: accountName
+            accountName: accountName,
+            category: "secondary",
+            currency: "NGN",
+            emailAddress: email,
+            mobile: {
+                phoneNumber: phone,
+                isoCode: "NG"
+            }
         };
 
         const headers = {
-            'x-api-key': apiKey
+            'x-giro-key': apiKey
         };
 
-        try {
-            await axios.post(url, payload, { headers });
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                const response = await axios.post(url, payload, { headers });
 
-            let foundAccount = null;
-            let currentPage = 1;
-            let hasMorePages = true;
+                if (response.data.meta.statusCode === 201 && response.data.meta.success) {
+                    const walletData = {
+                        accountNumber: response.data.data.accountNumber,
+                        currency: response.data.data.currency,
+                        user: user_id,
+                        accountName: response.data.data.accountName,
+                        balance: response.data.data.balance,
+                        bankCode: response.data.data.bankCode,
+                        bankName: response.data.data.bankName,
+                        publicId: response.data.data.publicId,
+                        status: 'active',
+                        sn: user_id
+                    };
 
-            while (hasMorePages) {
-                const searchUrl = `${process.env.GIRO_URL}/virtual-accounts?page=${currentPage}`;
-                const searchResponse = await axios.get(searchUrl, { headers });
-
-                if (searchResponse.data.meta.statusCode === 200 && searchResponse.data.meta.success) {
-                    const accounts = searchResponse.data.data;
-
-                    for (const account of accounts) {
-                        if (account.accountName === accountName) {
-                            foundAccount = account;
-                            break;
-                        }
-                    }
-
-                    hasMorePages = searchResponse.data.meta.pagination.totalCount > currentPage * searchResponse.data.meta.pagination.perPage;
-                    currentPage++;
+                    const wallet = await Wallet.create(walletData);
+                    return wallet;
                 } else {
-                    throw new Error('Failed to search for the account.');
+                    throw new Error('Failed to create the account.');
                 }
-
-                if (foundAccount) {
-                    break;
+            } catch (error) {
+                console.error(`Attempt ${attempt} failed:`, error.message);
+                if (attempt === MAX_RETRIES) {
+                    throw new Error('Exceeded maximum retry attempts');
                 }
+                await delay(RETRY_DELAY);
             }
+        }
+    },
 
-            if (foundAccount) {
-                const walletData = {
-                    accountNumber: foundAccount.accountNumber,
-                    currency: foundAccount.currency,
-                    user: foundAccount.user,
-                    accountName: foundAccount.accountName,
-                    balance: foundAccount.amount,  
-                    bankCode: foundAccount.bankCode,
-                    bankName: foundAccount.bankName,
-                    publicId: foundAccount.publicId,
-                    status: foundAccount.status,
-                    id: foundAccount.id,
-                    sn: user_id  
+    fetchVirtualAccount: async (user_id) => {
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                const userWallet = await Wallet.findOne({ where: { sn: user_id } });
+                if (!userWallet) {
+                    throw new Error("Wallet Not Found");
+                }
+
+                const url = `${process.env.GIRO_URL}/virtual-accounts/${userWallet.publicId}`;
+                const apiKey = process.env.GIRO_KEY;
+
+                const headers = {
+                    'x-giro-key': apiKey
                 };
 
-                await Wallet.create(walletData);
-                return foundAccount;
-            } else {
-                throw new Error('Account not found.');
-            }
-        } catch (error) {
-            console.error('Error in virtual account process:', error.message);
-            throw new Error(error.message);
-        }
-    },
-    fetchVirtualAccount: async (user_id) => {
-        try {
-            const userWallet = await Wallet.findOne({ where: { sn: user_id } });
-            if (!userWallet) {
-                throw new Error("Wallet Not Found");
-            }
+                const response = await axios.get(url, { headers });
 
-            const url = `${process.env.GIRO_URL}/virtual-accounts/${userWallet.id}`;
-            const apiKey = process.env.GIRO_KEY;
-
-            const headers = {
-                'x-api-key': apiKey
-            };
-
-            const response = await axios.get(url, { headers });
-
-            if (response.data.meta.statusCode === 200 && response.data.meta.success) {
-                userWallet.status = response.data.data.status;
-                await userWallet.save(); 
-            } else {
-                throw new Error("Failed to Fetch wallet status");
-            }
-        } catch (error) {
-            console.error('Error fetching virtual account:', error.message);
-            throw new Error(error.message);
-        }
-    },
-    fetchVirtualBalance: async (user_id) => {
-        try {
-            const userWallet = await Wallet.findOne({ where: { sn: user_id } });
-            if (!userWallet) {
-                throw new Error("Wallet Not Found");
-            }
-
-            const url = `${process.env.GIRO_URL}/virtual-accounts/${userWallet.id}/balance`;
-            const apiKey = process.env.GIRO_KEY;
-
-            const headers = {
-                'x-api-key': apiKey
-            };
-
-            const response = await axios.get(url, { headers });
-
-            if (response.data.meta.statusCode === 200 && response.data.meta.success) {
-                userWallet.balance = response.data.data.availableAmount;
-                await userWallet.save(); 
-            } else {
-                throw new Error("Failed to fetch virtual balance");
-            }
-        } catch (error) {
-            console.error('Error fetching virtual balance:', error.message);
-            throw new Error(error.message);
-        }
-    },
-    transferFunds: async (user_id, accountNumber, amount, bankCode, narration) => {
-        try {
-            const userWallet = await Wallet.findOne({ where: { sn: user_id } });
-            if (!userWallet) {
-                throw new Error("Wallet Not Found");
-            }
-
-            const url = `${process.env.GIRO_URL}/virtual-accounts/transfer`;
-            const apiKey = process.env.GIRO_KEY;
-
-            const headers = {
-                'x-api-key': apiKey,
-                'Content-Type': 'application/json'
-            };
-
-            const reference = generateRandomReference();
-
-            const payload = {
-                accountNumber: accountNumber,
-                bankCode: bankCode,
-                sourceAccount: userWallet.accountNumber,
-                amount: amount,
-                narration: narration,
-                reference: reference
-            };
-
-            const response = await axios.post(url, payload, { headers });
-
-            if (response.data.meta.statusCode === 200 && response.data.meta.success) {
-                const verifyUrl = `${process.env.GIRO_URL}/transactions/${reference}/verify`;
-                const verifyResponse = await axios.get(verifyUrl, { headers });
-
-                if (verifyResponse.data.meta.statusCode === 200 && verifyResponse.data.meta.success) {
-                    await giroService.fetchVirtualBalance(user_id)
+                if (response.data.meta.statusCode === 200 && response.data.meta.success) {
+                    userWallet.status = response.data.data.status;
+                    await userWallet.save();
                 } else {
-                    throw new Error("Failed to verify transfer");
+                    throw new Error("Failed to fetch wallet status");
                 }
-            } else {
-                throw new Error("Failed to transfer funds");
+            } catch (error) {
+                console.error(`Attempt ${attempt} failed:`, error.message);
+                if (attempt === MAX_RETRIES) {
+                    throw new Error('Exceeded maximum retry attempts');
+                }
+                await delay(RETRY_DELAY);
             }
-        } catch (error) {
-            console.error('Error transferring funds:', error.message);
-            throw new Error(error.message);
         }
-    }
+    },
+
+    fetchVirtualBalance: async (user_id) => {
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                const userWallet = await Wallet.findOne({ where: { sn: user_id } });
+                if (!userWallet) {
+                    throw new Error("Wallet Not Found");
+                }
+
+                const url = `${process.env.GIRO_URL}/virtual-accounts/${userWallet.publicId}/balance`;
+                const apiKey = process.env.GIRO_KEY;
+
+                const headers = {
+                    'x-giro-key': apiKey
+                };
+
+                const response = await axios.get(url, { headers });
+
+                if (response.data.meta.statusCode === 200 && response.data.meta.success) {
+                    userWallet.balance = response.data.data.availableAmount;
+                    await userWallet.save();
+                } else {
+                    throw new Error("Failed to fetch virtual balance");
+                }
+            } catch (error) {
+                console.error(`Attempt ${attempt} failed:`, error.message);
+                if (attempt === MAX_RETRIES) {
+                    throw new Error('Exceeded maximum retry attempts');
+                }
+                await delay(RETRY_DELAY);
+            }
+        }
+    },
+
+    transferFunds: async (user_id, amount) => {
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                const userWallet = await Wallet.findOne({ where: { sn: user_id } });
+                if (!userWallet) {
+                    throw new Error("Wallet Not Found");
+                }
+
+                const url = `${process.env.GIRO_URL}/virtual-accounts/transfer`;
+                const apiKey = process.env.GIRO_KEY;
+
+                const headers = {
+                    'x-giro-key': apiKey,
+                    'Content-Type': 'application/json'
+                };
+
+                const reference = generateRandomReference();
+
+                const payload = {
+                    destinationType: "VirtualAccount",
+                    destination: "vba-c6b3e044-b24c-4a4e-bac4-f43f96a44c7b",
+                    sourceType: "VirtualAccount",
+                    source: userWallet.publicId,
+                    amount: amount,
+                    narration: "Gaming",
+                    currency: "NGN"
+                };
+
+                const response = await axios.post(url, payload, { headers });
+
+                if (response.data.meta.statusCode === 200 && response.data.meta.success) {
+                    const verifyUrl = `${process.env.GIRO_URL}/transactions/${reference}/verify`;
+                    const verifyResponse = await axios.get(verifyUrl, { headers });
+
+                    if (verifyResponse.data.meta.statusCode === 200 && verifyResponse.data.meta.success) {
+                        await giroService.fetchVirtualBalance(user_id);
+                    } else {
+                        throw new Error("Failed to verify transfer");
+                    }
+                } else {
+                    throw new Error("Failed to transfer funds");
+                }
+            } catch (error) {
+                console.error(`Attempt ${attempt} failed:`, error.message);
+                if (attempt === MAX_RETRIES) {
+                    throw new Error('Exceeded maximum retry attempts');
+                }
+                await delay(RETRY_DELAY);
+            }
+        }
+    },
 };
 
 module.exports = giroService;

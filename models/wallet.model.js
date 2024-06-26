@@ -44,10 +44,6 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false,
             primaryKey: true,
         },
-        id: {
-            type: Sequelize.STRING,
-            allowNull: false,
-        },
     }, {
         timestamps: false
     });
