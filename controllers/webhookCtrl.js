@@ -5,6 +5,8 @@ const handleWebhook = async (req, res) => {
     const secret = process.env.GIRO_KEY;
     const payload = JSON.stringify(req.body);
     const hash = crypto.createHmac('sha512', secret).update(payload).digest('hex');
+
+    console.log('Generated hash:', hash);
     
     if (hash === req.headers['x-giro-signature']) {
         const event = req.body;
