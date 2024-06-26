@@ -3,7 +3,7 @@ require('dotenv').config();
 const model = require("../models");
 const Wallet = model.wallet;
 
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 7;
 const RETRY_DELAY = 3000; 
 
 function delay(ms) {
