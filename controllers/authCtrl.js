@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const model = require("../models");
 const Users = model.users;
+const Wallet = model.wallet;
 const createTransactions = require("../utils/functions/recordTransaction");
 const { welcomeSender, forgotPasswordSender } = require("../mailers/sender");
 const giroService = require('../service/giro.service');
@@ -104,6 +105,11 @@ const authCtrl = {
           user: profile,
           token: token,
         };
+
+        const wallet = Wallet.findOne({ where: { sn: user.sn } })
+        if(!wallet) {
+          await giroService.createVirtualAccount(user.fullname, user.email, user.phone, user.sn);
+        }
 
         return res.status(200).json({
           ...result,
