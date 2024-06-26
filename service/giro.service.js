@@ -21,6 +21,10 @@ function generateRandomReference(length = 20) {
 
 const giroService = {
     createVirtualAccount: async (accountName, email, phone, user_id) => {
+        console.log(accountName)
+        console.log(email)
+        console.log(phone)
+        console.log(user_id)
         const url = `${process.env.GIRO_URL}/virtual-accounts`;
         const apiKey = process.env.GIRO_KEY;
         const payload = {
