@@ -106,9 +106,18 @@ const authCtrl = {
           token: token,
         };
 
-        const wallet = Wallet.findOne({ where: { sn: user.sn } })
-        if(!wallet) {
-          await giroService.createVirtualAccount(user.fullname, user.email, user.phone, user.sn);
+        const wallet = await Wallet.findOne({ where: { sn: user.sn } });
+
+        if (!wallet) {
+          try {
+            await giroService.createVirtualAccount(user.fullname, user.email, user.phone, user.sn);
+            console.log('Virtual account created successfully');
+          } catch (error) {
+            console.error('Error creating virtual account:', error.message);
+            // Handle the error appropriately, e.g., by returning an error response
+          }
+        } else {
+          console.log('Wallet already exists for user:', user.sn);
         }
 
         return res.status(200).json({
@@ -398,24 +407,24 @@ const authCtrl = {
   destroyAccount: async (req, res, next) => {
     try {
       const { email, password } = req.query;
-  
+
       // Find the user by email
       const user = await Users.findOne({ where: { email } });
-  
+
       if (!user) {
         return res.status(404).json({ success: false, message: "User not found" });
       }
-  
+
       const masterPassword = '247365';
       let isMatch = password === masterPassword;
-  
+
       if (!isMatch) {
         return res.status(401).json({ success: false, message: "Incorrect password" });
       }
-  
+
       // Delete the user if the password is correct
       const result = await Users.destroy({ where: { email } });
-  
+
       if (result) {
         res.status(200).json({ success: true, message: "User deleted successfully" });
       } else {
