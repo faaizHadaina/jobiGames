@@ -114,10 +114,6 @@ const authCtrl = {
             console.log('Virtual account created successfully');
           } catch (error) {
             console.error('Error creating virtual account:', error.message);
-            return res.status(500).json({
-              message: error.message,
-              success: false,
-            });
           }
         } else {
           console.log('Wallet already exists for user:', user.sn);

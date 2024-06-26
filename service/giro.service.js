@@ -29,6 +29,8 @@ const giroService = {
             phone = '234' + phone.slice(1);
         }
 
+        console.log(phone)
+
         const payload = {
             accountName: accountName,
             category: "secondary",
