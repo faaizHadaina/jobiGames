@@ -3,7 +3,7 @@ require('dotenv').config();
 const model = require("../models");
 const Wallet = model.wallet;
 
-const MAX_RETRIES = 7;
+const MAX_RETRIES = 3;
 const RETRY_DELAY = 3000; 
 
 function delay(ms) {
@@ -21,12 +21,14 @@ function generateRandomReference(length = 20) {
 
 const giroService = {
     createVirtualAccount: async (accountName, email, phone, user_id) => {
-        console.log(accountName)
-        console.log(email)
-        console.log(phone)
-        console.log(user_id)
         const url = `${process.env.GIRO_URL}/virtual-accounts`;
         const apiKey = process.env.GIRO_KEY;
+
+        // Check and modify the phone number
+        if (phone.startsWith('0')) {
+            phone = '234' + phone.slice(1);
+        }
+
         const payload = {
             accountName: accountName,
             category: "secondary",
