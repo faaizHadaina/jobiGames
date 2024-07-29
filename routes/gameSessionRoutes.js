@@ -5,6 +5,10 @@ const auth = require("../middleware/auth.middleware");
 const router = express.Router();
 
 router.post("/gameSession", auth, gameSessionCtrl.handleGameSession);
+router.post("/addSession", gameSessionCtrl.addGameSession);
+router.put('/updateSession',  gameSessionCtrl.updateGameSession);
+router.put('/updateOpponent', gameSessionCtrl.updateOpponentInSession);
+router.put('/updateBalance', gameSessionCtrl.updateUserBalance);
 router.post("/connectToSession", auth, gameSessionCtrl.connectOpponent);
 router.get("/fetchAll", auth, gameSessionCtrl.fetchAllGameSessions);
 router.get(

@@ -8,26 +8,46 @@ requiredEnv.forEach(env => {
     }
 });
 
-let transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT, 10),
-    secure: process.env.SMTP_SSL === 'true', 
-    auth: {
-        user: process.env.SMTP_USERNAME,
-        pass: process.env.SMTP_PASSWORD
-    }
-});
+let transporter;
+try {
+    transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        secure: true, 
+        auth: {
+            user: process.env.SMTP_USERNAME,
+            pass: process.env.SMTP_PASSWORD
+        }
+    });
 
-const email = new Email({
-    views: { 
-        root: "email_templates",
-        options: { extension: "ejs" },
-    },
-    message: {
-        from: process.env.FROM
-    },
-    send: true,
-    transport: transporter
-});
+    transporter.verify((error, success) => {
+        if (error) {
+            console.error('Error configuring SMTP transporter:', error);
+        } else {
+            console.log('SMTP transporter configured successfully');
+        }
+    });
+} catch (error) {
+    console.error('Error creating SMTP transporter:', error.message);
+}
+
+let email;
+try {
+    email = new Email({
+        views: { 
+            root: "email_templates",
+            options: { extension: "ejs" },
+        },
+        message: {
+            from: process.env.FROM
+        },
+        send: true,
+        transport: transporter
+    });
+
+    console.log('Email configuration created successfully');
+} catch (error) {
+    console.error('Error initializing email configuration:', error.message);
+}
 
 module.exports = { email };

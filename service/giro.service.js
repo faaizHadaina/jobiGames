@@ -3,7 +3,7 @@ require('dotenv').config();
 const model = require("../models");
 const Wallet = model.wallet;
 
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 10;
 const RETRY_DELAY = 3000; 
 
 function delay(ms) {
@@ -56,7 +56,7 @@ const giroService = {
                         currency: response.data.data.currency,
                         user: user_id,
                         accountName: response.data.data.accountName,
-                        balance: response.data.data.balance,
+                        balance: 1000, //response.data.data.balance
                         bankCode: response.data.data.bankCode,
                         bankName: response.data.data.bankName,
                         publicId: response.data.data.publicId,

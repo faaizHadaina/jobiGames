@@ -505,6 +505,130 @@ const gameSessionCtrl = {
       res.status(500).json({ success: false, message: error.message });
     }
   },
-};
+
+  addGameSession: async (req, res) => {
+    try {
+      const email = req.body.email;
+      const opponent = req.body.opponent;
+      const amount = req.body.amount;
+  
+      if (!email || !opponent || !amount) {
+        return res.status(400).json({ success: false, message: 'Missing required query parameters' });
+      }
+  
+      const strid = new Date().toISOString().replace(/[-:.T]/g, '').slice(0, 14);
+  
+      const owner = await Users.findOne({ where: { email: email } });
+      const guest = await Users.findOne({ where: { email: opponent } });
+  
+      if (!owner || !guest) {
+        return res.status(404).json({ success: false, message: 'Owner or guest not found' });
+      }
+  
+      const newSession = await GameSessions.create({
+        strid: strid,
+        room_owner: owner.sn,
+        user_id: owner.sn,
+        opponent_id: guest.sn,
+        coin: amount,
+        game_id: 200,
+        room_id: 123,
+        room_pass: 'NA',
+        duration: 'NA',
+        winner: 'NA',
+        winreason: 'NA',
+        status: 'Open',
+        date_created: new Date(),
+        timestarted: new Date(),
+      });
+  
+      res.status(200).json({ success: true, message: strid, session: newSession });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  updateGameSession: async (req, res) => {
+    try {
+      const email = req.body.email;
+      const reason = req.body.reason;
+      const strid = req.body.strid;
+  
+      const session = await GameSessions.findOne({ where: { strid: strid } });
+  
+      if (session) {
+        const duration = Math.floor((new Date() - new Date(session.timestarted)) / (1000 * 60));
+  
+        session.status = 'Failed';
+        session.duration = duration.toString(); 
+        session.winner = email;
+        session.winreason = reason;
+  
+        await session.save();
+  
+        res.status(200).json({ success: true, message: strid });
+      } else {
+        res.status(404).json({ success: false, message: 'Session not found' });
+      }
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  updateOpponentInSession: async (req, res) => {
+    try {
+      const email = req.body.email;
+      const strid = req.body.strid;
+  
+      const session = await GameSessions.findOne({ where: { strid: strid } });
+  
+      if (session) {
+        const opponent = await Users.findOne({ where: { email: email } });
+        session.opponent_id = opponent.sn;
+  
+        await session.save();
+  
+        res.status(200).json({ success: true, message: strid });
+      } else {
+        res.status(404).json({ success: false, message: 'Session not found' });
+      }
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  updateUserBalance: async (req, res) => {
+    try {
+      const email = req.body.email;
+      const coins = parseFloat(req.body.coins);
+      const winning = req.body.winning === true;
+  
+      const user = await Users.findOne({ where: { email } });
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+  
+      const wallet = await Wallet.findOne({ where: { sn: user.sn }});
+      if (!wallet) {
+        return res.status(404).json({ success: false, message: 'Wallet not found' });
+      }
+  
+      wallet.balance += coins;
+      await wallet.save();
+  
+      if (winning) {
+        const jobigamesUser = await Users.findOne({ where: { email: 'info@jobigames.com' } });
+        if (jobigamesUser) {
+          jobigamesUser.balance += 300;
+          await jobigamesUser.save();
+        }
+      }
+  
+      res.status(200).json({ success: true, message: 'success' });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+}
 
 module.exports = gameSessionCtrl;

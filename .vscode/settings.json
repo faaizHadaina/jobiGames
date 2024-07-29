@@ -10,5 +10,7 @@
         "mygames",
         "onlineusers",
         "withdrawrequest"
-    ]
+    ],
+    "editor.fontLigatures": false,
+    "editor.fontFamily": "Fira Code"
 }

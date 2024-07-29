@@ -6,6 +6,10 @@ module.exports = (sequelize, Sequelize) => {
       primaryKey: true,
       autoIncrement: true,
     },
+    strid: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
     room_owner: {
       type: Sequelize.STRING,
       allowNull: false,
@@ -24,13 +28,25 @@ module.exports = (sequelize, Sequelize) => {
     },
     game_id: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     room_id: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     room_pass: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+    duration: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+    winner: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+    winreason: {
       type: Sequelize.STRING,
       allowNull: false,
     },
@@ -39,6 +55,10 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
     },
     date_created: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.NOW
+    },
+    timestarted: {
       type: Sequelize.DATE,
       defaultValue: Sequelize.NOW
     }
