@@ -1,3 +1,4 @@
+const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const { users: Users } = require("../../models");
 const { welcomeSender } = require("../sender");
