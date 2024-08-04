@@ -8,15 +8,15 @@ module.exports = (sequelize, Sequelize) => {
     },
     strid: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     room_owner: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     user_id: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     opponent_id: {
       type: Sequelize.INTEGER,
@@ -24,7 +24,7 @@ module.exports = (sequelize, Sequelize) => {
     },
     coin: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     game_id: {
       type: Sequelize.INTEGER,
@@ -36,23 +36,23 @@ module.exports = (sequelize, Sequelize) => {
     },
     room_pass: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     duration: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     winner: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     winreason: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     status: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     date_created: {
       type: Sequelize.DATE,

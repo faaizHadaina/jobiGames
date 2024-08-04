@@ -13,20 +13,20 @@ const gameSessionCtrl = {
       const user_id = req.user.sn;
 
       const user = await Users.findOne({ where: { sn: user_id } });
-      const userWallet = await Wallet.findOne({ where: { sn: user_id } });
+      // const userWallet = await Wallet.findOne({ where: { sn: user_id } });
       if (!user) {
         return res
           .status(401)
           .json({ message: "Authentication failed", success: false });
       }
 
-      if (!userWallet) {
-        return res
-          .status(401)
-          .json({ message: "Wallet Not Found", success: false });
-      }
+      // if (!userWallet) {
+      //   return res
+      //     .status(401)
+      //     .json({ message: "Wallet Not Found", success: false });
+      // }
 
-      if (userWallet.balance < coin) {
+      if (user.balance < coin) {
         return res.status(400).json({
           success: false,
           message:
@@ -49,34 +49,34 @@ const gameSessionCtrl = {
         }
 
         const opponent = await Users.findOne({ where: { sn: opponent_id } });
-        const opponentWallet = await Wallet.findOne({ where: { sn: opponent_id } });
+        // const opponentWallet = await Wallet.findOne({ where: { sn: opponent_id } });
         if (!opponent) {
           return res
             .status(404)
             .json({ success: false, message: "Opponent not found" });
         }
 
-        if (!opponentWallet) {
-          return res
-            .status(404)
-            .json({ success: false, message: "Opponent Wallet not found" });
-        }
+        // if (!opponentWallet) {
+        //   return res
+        //     .status(404)
+        //     .json({ success: false, message: "Opponent Wallet not found" });
+        // }
 
-        const newOpponentBalance = parseFloat(opponentWallet.balance) - coin;
-        opponentWallet.balance = newOpponentBalance.toFixed(2);
-        await opponentWallet.save();
+        const newOpponentBalance = parseFloat(opponent.balance) - coin;
+        opponent.balance = newOpponentBalance.toFixed(2);
+        await opponent.save();
 
         const creator = await Users.findOne({
           where: { sn: existingRoom.user_id },
         });
 
-        const creatorWallet = await Wallet.findOne({
-          where: { sn: existingRoom.user_id },
-        });
+        // const creatorWallet = await Wallet.findOne({
+        //   where: { sn: existingRoom.user_id },
+        // });
 
-        const newUserBalance = parseFloat(creatorWallet.balance) - coin;
-        creatorWallet.balance = newUserBalance.toFixed(2);
-        await creatorWallet.save();
+        const newUserBalance = parseFloat(creator.balance) - coin;
+        creator.balance = newUserBalance.toFixed(2);
+        await creator.save();
 
         await existingRoom.update({
           opponent_id: opponent_id,
@@ -97,7 +97,9 @@ const gameSessionCtrl = {
           room: existingRoom,
         });
       } else {
+        const strid = new Date().toISOString().replace(/[-:.T]/g, '').slice(0, 14);
         const newRoom = await GameSessions.create({
+          strid,
           room_id,
           game_id,
           room_pass,
@@ -183,20 +185,20 @@ const gameSessionCtrl = {
           room.user_id === user_id ? room.opponent_id : room.user_id;
 
         const opponent = await Users.findOne({ where: { sn: userToCredit } });
-        const opponentWallet = await Wallet.findOne({ where: { sn: userToCredit } });
+        // const opponentWallet = await Wallet.findOne({ where: { sn: userToCredit } });
         if (!opponent) {
           return res
             .status(404)
             .json({ message: "Opponent Not Found", success: false });
         }
 
-        if (!opponentWallet) {
-          return res
-            .status(404)
-            .json({ message: "Opponent Wallet Not Found", success: false });
-        }
+        // if (!opponentWallet) {
+        //   return res
+        //     .status(404)
+        //     .json({ message: "Opponent Wallet Not Found", success: false });
+        // }
 
-        const currentBalance = parseFloat(opponentWallet.balance);
+        const currentBalance = parseFloat(opponent.balance);
         const newBalance = currentBalance + amountToAdd;
 
         const data = {
@@ -259,8 +261,8 @@ const gameSessionCtrl = {
       const opponent = await Users.findOne({ where: { sn: opponent_id } });
       const creator = await Users.findOne({ where: { sn: room.user_id } });
 
-      const opponentWallet = await Wallet.findOne({ where: { sn: opponent_id } });
-      const creatorWallet = await Wallet.findOne({ where: { sn: room.user_id } });
+      // const opponentWallet = await Wallet.findOne({ where: { sn: opponent_id } });
+      // const creatorWallet = await Wallet.findOne({ where: { sn: room.user_id } });
 
       if (!opponent) {
         return res
@@ -268,13 +270,13 @@ const gameSessionCtrl = {
           .json({ success: false, message: "Opponent not found" });
       }
 
-      if (!opponentWallet) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Opponent Wallet not found" });
-      }
+      // if (!opponentWallet) {
+      //   return res
+      //     .status(404)
+      //     .json({ success: false, message: "Opponent Wallet not found" });
+      // }
 
-      if (parseFloat(opponentWallet.balance) < room.coin) {
+      if (parseFloat(opponent.balance) < room.coin) {
         return res.status(400).json({
           success: false,
           message:
@@ -282,11 +284,11 @@ const gameSessionCtrl = {
         });
       }
 
-      opponentWallet.balance -= room.coin;
-      creatorWallet.balance -= room.coin;
+      opponent.balance -= room.coin;
+      creator.balance -= room.coin;
 
-      await opponentWallet.save();
-      await creatorWallet.save();
+      await opponent.save();
+      await creator.save();
 
       await room.update({ opponent_id: opponent_id, status: "filled" });
 
@@ -312,7 +314,7 @@ const gameSessionCtrl = {
       }
 
       const user = await Users.findOne({ where: { sn: user_id } });
-      const userWallet = await Wallet.findOne({ where: { sn: user_id } });
+      // const userWallet = await Wallet.findOne({ where: { sn: user_id } });
 
       if (!user) {
         return res
@@ -320,11 +322,11 @@ const gameSessionCtrl = {
           .json({ message: "User Not Found", success: false });
       }
 
-      if (!userWallet) {
-        return res
-          .status(404)
-          .json({ message: "Wallet Not Found", success: false });
-      }
+      // if (!userWallet) {
+      //   return res
+      //     .status(404)
+      //     .json({ message: "Wallet Not Found", success: false });
+      // }
 
       const sessionCoin = session.coin * 2;
       const adminChargeRate = sessionCoin > 1000000 ? 0.05 : 0.1;
@@ -343,7 +345,7 @@ const gameSessionCtrl = {
       await createTransactions([user], data);
       await createAdminCharges([user], parseFloat(adminCharge));
 
-      await userWallet.update({ balance: newBalance });
+      await user.update({ balance: newBalance });
 
       res.status(200).json({
         success: true,
@@ -388,20 +390,20 @@ const gameSessionCtrl = {
       }
 
       const user = await Users.findOne({ where: { sn: numericUserId } });
-      const userWallet = await Wallet.findOne({ where: { sn: numericUserId } });
+      //const userWallet = await Wallet.findOne({ where: { sn: numericUserId } });
       if (!user) {
         return res
           .status(404)
           .json({ message: "User Not Found", success: false });
       }
 
-      if (!userWallet) {
-        return res
-          .status(404)
-          .json({ message: "User Wallet Not Found", success: false });
-      }
+      // if (!userWallet) {
+      //   return res
+      //     .status(404)
+      //     .json({ message: "User Wallet Not Found", success: false });
+      // }
 
-      if (parseFloat(userWallet.balance) < parseFloat(session.coin)) {
+      if (parseFloat(user.balance) < parseFloat(session.coin)) {
         return res.status(400).json({
           success: false,
           message: "Insufficient balance to request a game session replay",
@@ -443,7 +445,7 @@ const gameSessionCtrl = {
       }
 
       const user = await Users.findOne({ where: { sn: numericUserId } });
-      const userWallet = await Wallet.findOne({ where: { sn: numericUserId } });
+      // const userWallet = await Wallet.findOne({ where: { sn: numericUserId } });
 
       if (!user) {
         return res
@@ -451,18 +453,18 @@ const gameSessionCtrl = {
           .json({ message: "User Not Found", success: false });
       }
 
-      if (!userWallet) {
-        return res
-          .status(404)
-          .json({ message: "User Wallet Not Found", success: false });
-      }
+      // if (!userWallet) {
+      //   return res
+      //     .status(404)
+      //     .json({ message: "User Wallet Not Found", success: false });
+      // }
 
       const opponentId =
         session.user_id === numericUserId
           ? session.opponent_id
           : session.user_id;
       const opponent = await Users.findOne({ where: { sn: opponentId } });
-      const opponentWallet = await Wallet.findOne({ where: { sn: opponentId } });
+      // const opponentWallet = await Wallet.findOne({ where: { sn: opponentId } });
 
       if (!opponent) {
         return res
@@ -470,24 +472,24 @@ const gameSessionCtrl = {
           .json({ message: "Opponent Not Found", success: false });
       }
 
-      if (!opponentWallet) {
-        return res
-          .status(404)
-          .json({ message: "Opponent Wallet Not Found", success: false });
-      }
+      // if (!opponentWallet) {
+      //   return res
+      //     .status(404)
+      //     .json({ message: "Opponent Wallet Not Found", success: false });
+      // }
 
-      if (parseFloat(userWallet.balance) < parseFloat(session.coin)) {
+      if (parseFloat(user.balance) < parseFloat(session.coin)) {
         return res.status(400).json({
           success: false,
           message: "Insufficient balance to accept or restart the game session",
         });
       }
 
-      userWallet.balance -= session.coin;
-      opponentWallet.balance -= session.coin;
+      user.balance -= session.coin;
+      opponent.balance -= session.coin;
 
-      await userWallet.save();
-      await opponentWallet.save();
+      await user.save();
+      await opponent.save();
 
       const data = {
         amount: session.coin,
@@ -608,13 +610,13 @@ const gameSessionCtrl = {
         return res.status(404).json({ success: false, message: 'User not found' });
       }
   
-      const wallet = await Wallet.findOne({ where: { sn: user.sn }});
-      if (!wallet) {
-        return res.status(404).json({ success: false, message: 'Wallet not found' });
-      }
+      // const wallet = await Wallet.findOne({ where: { sn: user.sn }});
+      // if (!wallet) {
+      //   return res.status(404).json({ success: false, message: 'Wallet not found' });
+      // }
   
-      wallet.balance += coins;
-      await wallet.save();
+      user.balance += coins;
+      await user.save();
   
       if (winning) {
         const jobigamesUser = await Users.findOne({ where: { email: 'info@jobigames.com' } });
