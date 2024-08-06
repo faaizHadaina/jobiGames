@@ -14,7 +14,7 @@ const sendVerificationEmail = async (email) => {
     const code = crypto.randomInt(1000, 10000);
     
     await Users.update({ verificationCode: code }, { where: { sn: user.sn } });
-    welcomeSender(user.email, user.fullName, code);
+    welcomeSender(user.email, user.fullname, code);
 
     return { success: true, message: "Verification code sent to your email", status: 200 };
   } catch (err) {

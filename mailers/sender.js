@@ -28,7 +28,22 @@ const forgotPasswordSender = async (recipient, name, code) => {
     }
 };
 
+const onboardingSender = async (recipient, name) => {
+    try {
+        console.log(`Sending onboarding email to ${recipient}`);
+        await email.send({
+            template: 'onboarding',
+            message: { to: recipient },
+            locals: { name }
+        });
+        console.log(`Onbaording email sent successfully to ${recipient}`);
+    } catch (error) {
+        console.error(`Error sending Onbaording email to ${recipient}:`, error);
+    }
+};
+
 module.exports = {    
     welcomeSender,
-    forgotPasswordSender
+    forgotPasswordSender,
+    onboardingSender
 };

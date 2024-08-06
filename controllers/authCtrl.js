@@ -7,6 +7,7 @@ const Wallet = model.wallet;
 const createTransactions = require("../utils/functions/recordTransaction");
 const { forgotPasswordSender } = require("../mailers/sender");
 const { sendVerificationEmail } = require("../mailers/utils/verificationEmail");
+const { sendOnboardingEmail } = require("../mailers/utils/onboardingEmail");
 const giroService = require('../service/giro.service');
 
 function generateID(length) {
@@ -59,7 +60,16 @@ const authCtrl = {
           .status(verificationResponse.status)
           .json({ message: verificationResponse.message, success: false });
       }
-      await giroService.createVirtualAccount(fullname, email, phone, createdUser.sn);
+
+      const onboardingResponse = await sendOnboardingEmail(
+        createdUser.email
+      );
+      if (!onboardingResponse.success) {
+        return res
+          .status(onboardingResponse.status)
+          .json({ message: onboardingResponse.message, success: false });
+      }
+      // await giroService.createVirtualAccount(fullname, email, phone, createdUser.sn);
 
       return res.status(201).json({
         user: userResponse,
