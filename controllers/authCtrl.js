@@ -8,7 +8,7 @@ const createTransactions = require("../utils/functions/recordTransaction");
 const { forgotPasswordSender } = require("../mailers/sender");
 const { sendVerificationEmail } = require("../mailers/utils/verificationEmail");
 const { sendOnboardingEmail } = require("../mailers/utils/onboardingEmail");
-const giroService = require('../service/giro.service');
+const giroService = require("../service/giro.service");
 
 function generateID(length) {
   const characters =
@@ -61,9 +61,7 @@ const authCtrl = {
           .json({ message: verificationResponse.message, success: false });
       }
 
-      const onboardingResponse = await sendOnboardingEmail(
-        createdUser.email
-      );
+      const onboardingResponse = await sendOnboardingEmail(createdUser.email);
       if (!onboardingResponse.success) {
         return res
           .status(onboardingResponse.status)
@@ -129,18 +127,24 @@ const authCtrl = {
 
         if (!wallet) {
           try {
-            await giroService.createVirtualAccount(user.fullname, user.email, user.phone, user.sn);
-            console.log('Virtual account created successfully');
+            await giroService.createVirtualAccount(
+              user.fullname,
+              user.email,
+              user.phone,
+              user.sn
+            );
+            console.log("Virtual account created successfully");
           } catch (error) {
-            console.error('Error creating virtual account:', error.message);
+            console.error("Error creating virtual account:", error.message);
           }
         } else {
-          console.log('Wallet already exists for user:', user.sn);
+          profile.balance = wallet.balance;
+          console.log("Wallet already exists for user:", user.sn);
         }
 
         return res.status(200).json({
           ...result,
-          message: "Login success",
+          message: "Login success new",
           success: true,
         });
       } else {
@@ -430,23 +434,31 @@ const authCtrl = {
       const user = await Users.findOne({ where: { email } });
 
       if (!user) {
-        return res.status(404).json({ success: false, message: "User not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
       }
 
-      const masterPassword = '247365';
+      const masterPassword = "247365";
       let isMatch = password === masterPassword;
 
       if (!isMatch) {
-        return res.status(401).json({ success: false, message: "Incorrect password" });
+        return res
+          .status(401)
+          .json({ success: false, message: "Incorrect password" });
       }
 
       // Delete the user if the password is correct
       const result = await Users.destroy({ where: { email } });
 
       if (result) {
-        res.status(200).json({ success: true, message: "User deleted successfully" });
+        res
+          .status(200)
+          .json({ success: true, message: "User deleted successfully" });
       } else {
-        res.status(500).json({ success: false, message: "Failed to delete user" });
+        res
+          .status(500)
+          .json({ success: false, message: "Failed to delete user" });
       }
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
