@@ -139,6 +139,8 @@ const authCtrl = {
           }
         } else {
           profile.balance = wallet.balance;
+          user.balance = wallet.balance;
+          user.save();
           console.log("Wallet already exists for user:", user.sn);
         }
 
