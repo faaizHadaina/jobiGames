@@ -150,12 +150,10 @@ const authCtrl = {
           user.save();
           console.log("Wallet already exists for user:", user.sn);
         }
-        const transResp = await giroService.transferFunds(wallet.publicId, 500);
 
         return res.status(200).json({
           ...result,
-          transResp,
-          message: "Login success new",
+          message: "Login success ",
           success: true,
         });
       } else {
@@ -168,7 +166,6 @@ const authCtrl = {
     } catch (err) {
       //  console.log(err.message);
       return res.status(500).json({
-        ade: "she",
         message: err,
         success: false,
       });
