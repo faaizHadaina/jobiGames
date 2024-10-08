@@ -27,6 +27,7 @@ const gameSessionCtrl = {
           .status(401)
           .json({ message: "Wallet Not Found", success: false });
       }
+      return res.status(401).json({ message: giroWallet, success: false });
 
       if (giroWallet.balance < coin || userWallet.balance < coin) {
         return res.status(400).json({
