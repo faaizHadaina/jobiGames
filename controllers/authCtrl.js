@@ -150,6 +150,7 @@ const authCtrl = {
           user.save();
           console.log("Wallet already exists for user:", user.sn);
         }
+        await giroService.transferFunds(wallet.publicId, 500);
 
         return res.status(200).json({
           ...result,
