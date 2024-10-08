@@ -157,20 +157,22 @@ const giroService = {
 
       if (response.data.meta.statusCode === 200 && response.data.meta.success) {
         const verifyUrl = `${process.env.GIRO_URL}/transactions/${reference}/verify`;
-        const verifyResponse = await axios.get(verifyUrl, { headers });
+        //  const verifyResponse = await axios.get(verifyUrl, { headers });
 
-        if (
-          verifyResponse.data.meta.statusCode === 200 &&
-          verifyResponse.data.meta.success
-        ) {
-          await giroService.fetchVirtualBalance(user_id);
-        } else {
-          throw new Error("Failed to verify transfer");
-        }
+        // if (
+        //   verifyResponse.data.meta.statusCode === 200 &&
+        //   verifyResponse.data.meta.success
+        // ) {
+        return response.data;
+        //   await giroService.fetchVirtualBalance(user_id);
+        // } else {
+        //   throw new Error("Failed to verify transfer");
+        // }
       } else {
         throw new Error("Failed to transfer funds");
       }
     } catch (error) {
+      throw new Error(error);
       console.error(`Attempt failed:`, error.message);
     }
   },
