@@ -67,8 +67,14 @@ const authCtrl = {
           .status(onboardingResponse.status)
           .json({ message: onboardingResponse.message, success: false });
       }
-      // await giroService.createVirtualAccount(fullname, email, phone, createdUser.sn);
-
+      const giroUser = await giroService.createVirtualAccount(
+        fullname,
+        email,
+        phone,
+        createdUser.sn
+      );
+      createdUser.ID = giroUser.data.publicId;
+      createdUser.save();
       return res.status(201).json({
         user: userResponse,
         message: "Account successfully created",
@@ -123,7 +129,7 @@ const authCtrl = {
           token: token,
         };
 
-        const wallet = await Wallet.findOne({ where: { sn: user.sn } });
+        const wallet = await Wallet.findOne({ where: { publicId: user.ID } });
 
         if (!wallet) {
           try {
@@ -131,6 +137,7 @@ const authCtrl = {
               user.fullname,
               user.email,
               user.phone,
+              user.ID,
               user.sn
             );
             console.log("Virtual account created successfully");

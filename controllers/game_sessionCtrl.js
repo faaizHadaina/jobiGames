@@ -5,6 +5,7 @@ const GameSessions = model.sessions;
 const Users = model.users;
 const Wallet = model.wallet;
 const crypto = require("crypto");
+const giroService = require("../service/giro.service");
 
 const gameSessionCtrl = {
   handleGameSession: async (req, res, next) => {
@@ -13,20 +14,21 @@ const gameSessionCtrl = {
       const user_id = req.user.sn;
 
       const user = await Users.findOne({ where: { sn: user_id } });
-      // const userWallet = await Wallet.findOne({ where: { sn: user_id } });
+      const giroWallet = await giroService.fetchVirtualAccount(user.ID);
+      const userWallet = await Wallet.findOne({ where: { sn: user.ID } });
       if (!user) {
         return res
           .status(401)
           .json({ message: "Authentication failed", success: false });
       }
 
-      // if (!userWallet) {
-      //   return res
-      //     .status(401)
-      //     .json({ message: "Wallet Not Found", success: false });
-      // }
+      if (!userWallet) {
+        return res
+          .status(401)
+          .json({ message: "Wallet Not Found", success: false });
+      }
 
-      if (user.balance < coin) {
+      if (giroWallet.balance < coin || userWallet.balance < coin) {
         return res.status(400).json({
           success: false,
           message:
@@ -49,34 +51,53 @@ const gameSessionCtrl = {
         }
 
         const opponent = await Users.findOne({ where: { sn: opponent_id } });
-        // const opponentWallet = await Wallet.findOne({ where: { sn: opponent_id } });
+        const opponentgiroWallet = await giroService.fetchVirtualAccount(
+          opponent.ID
+        );
+        const opponentWallet = await Wallet.findOne({
+          where: { publicId: opponent.ID },
+        });
         if (!opponent) {
           return res
             .status(404)
             .json({ success: false, message: "Opponent not found" });
         }
 
-        // if (!opponentWallet) {
-        //   return res
-        //     .status(404)
-        //     .json({ success: false, message: "Opponent Wallet not found" });
-        // }
+        if (!opponentWallet) {
+          return res
+            .status(404)
+            .json({ success: false, message: "Opponent Wallet not found" });
+        }
 
-        const newOpponentBalance = parseFloat(opponent.balance) - coin;
-        opponent.balance = newOpponentBalance.toFixed(2);
-        await opponent.save();
+        if (
+          opponentgiroWallet.balance < coin ||
+          opponentWallet.balance < coin
+        ) {
+          return res.status(400).json({
+            success: false,
+            message: "Insufficient balance for opponent.",
+          });
+        }
+
+        await giroService.transferFunds(opponentWallet.publicId, coin);
+
+        const newOpponentBalance = parseFloat(opponentWallet.balance) - coin;
+        opponentWallet.balance = newOpponentBalance.toFixed(2);
+        await opponentWallet.save();
 
         const creator = await Users.findOne({
           where: { sn: existingRoom.user_id },
         });
 
-        // const creatorWallet = await Wallet.findOne({
-        //   where: { sn: existingRoom.user_id },
-        // });
+        const creatorWallet = await Wallet.findOne({
+          where: { publicId: creator.ID },
+        });
 
-        const newUserBalance = parseFloat(creator.balance) - coin;
-        creator.balance = newUserBalance.toFixed(2);
-        await creator.save();
+        await giroService.transferFunds(creatorWallet.publicId, coin);
+
+        const newUserBalance = parseFloat(creatorWallet.balance) - coin;
+        creatorWallet.balance = newUserBalance.toFixed(2);
+        await creatorWallet.save();
 
         await existingRoom.update({
           opponent_id: opponent_id,
@@ -97,7 +118,10 @@ const gameSessionCtrl = {
           room: existingRoom,
         });
       } else {
-        const strid = new Date().toISOString().replace(/[-:.T]/g, '').slice(0, 14);
+        const strid = new Date()
+          .toISOString()
+          .replace(/[-:.T]/g, "")
+          .slice(0, 14);
         const newRoom = await GameSessions.create({
           strid,
           room_id,
@@ -185,20 +209,24 @@ const gameSessionCtrl = {
           room.user_id === user_id ? room.opponent_id : room.user_id;
 
         const opponent = await Users.findOne({ where: { sn: userToCredit } });
-        // const opponentWallet = await Wallet.findOne({ where: { sn: userToCredit } });
+        const opponentWallet = await Wallet.findOne({
+          where: { publicId: opponent.ID },
+        });
         if (!opponent) {
           return res
             .status(404)
             .json({ message: "Opponent Not Found", success: false });
         }
 
-        // if (!opponentWallet) {
-        //   return res
-        //     .status(404)
-        //     .json({ message: "Opponent Wallet Not Found", success: false });
-        // }
+        if (!opponentWallet) {
+          return res
+            .status(404)
+            .json({ message: "Opponent Wallet Not Found", success: false });
+        }
 
-        const currentBalance = parseFloat(opponent.balance);
+        await giroService.payWinner(opponentWallet.publicId, amountToAdd);
+
+        const currentBalance = parseFloat(opponentWallet.balance);
         const newBalance = currentBalance + amountToAdd;
 
         const data = {
@@ -210,7 +238,7 @@ const gameSessionCtrl = {
         await createTransactions([opponent], data);
         await createAdminCharges([opponent], parseFloat(adminCharge));
 
-        await opponent.update({ balance: newBalance });
+        await opponentWallet.update({ balance: newBalance });
 
         await GameSessions.destroy({
           where: { room_pass: room_id, game_id },
@@ -513,20 +541,28 @@ const gameSessionCtrl = {
       const email = req.body.email;
       const opponent = req.body.opponent;
       const amount = req.body.amount;
-  
+
       if (!email || !opponent || !amount) {
-        return res.status(400).json({ success: false, message: 'Missing required query parameters' });
+        return res.status(400).json({
+          success: false,
+          message: "Missing required query parameters",
+        });
       }
-  
-      const strid = new Date().toISOString().replace(/[-:.T]/g, '').slice(0, 14);
-  
+
+      const strid = new Date()
+        .toISOString()
+        .replace(/[-:.T]/g, "")
+        .slice(0, 14);
+
       const owner = await Users.findOne({ where: { email: email } });
       const guest = await Users.findOne({ where: { email: opponent } });
-  
+
       if (!owner || !guest) {
-        return res.status(404).json({ success: false, message: 'Owner or guest not found' });
+        return res
+          .status(404)
+          .json({ success: false, message: "Owner or guest not found" });
       }
-  
+
       const newSession = await GameSessions.create({
         strid: strid,
         room_owner: owner.sn,
@@ -535,16 +571,18 @@ const gameSessionCtrl = {
         coin: amount,
         game_id: 200,
         room_id: 123,
-        room_pass: 'NA',
-        duration: 'NA',
-        winner: 'NA',
-        winreason: 'NA',
-        status: 'Open',
+        room_pass: "NA",
+        duration: "NA",
+        winner: "NA",
+        winreason: "NA",
+        status: "Open",
         date_created: new Date(),
         timestarted: new Date(),
       });
-  
-      res.status(200).json({ success: true, message: strid, session: newSession });
+
+      res
+        .status(200)
+        .json({ success: true, message: strid, session: newSession });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -555,22 +593,24 @@ const gameSessionCtrl = {
       const email = req.body.email;
       const reason = req.body.reason;
       const strid = req.body.strid;
-  
+
       const session = await GameSessions.findOne({ where: { strid: strid } });
-  
+
       if (session) {
-        const duration = Math.floor((new Date() - new Date(session.timestarted)) / (1000 * 60));
-  
-        session.status = 'Failed';
-        session.duration = duration.toString(); 
+        const duration = Math.floor(
+          (new Date() - new Date(session.timestarted)) / (1000 * 60)
+        );
+
+        session.status = "Failed";
+        session.duration = duration.toString();
         session.winner = email;
         session.winreason = reason;
-  
+
         await session.save();
-  
+
         res.status(200).json({ success: true, message: strid });
       } else {
-        res.status(404).json({ success: false, message: 'Session not found' });
+        res.status(404).json({ success: false, message: "Session not found" });
       }
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
@@ -581,18 +621,18 @@ const gameSessionCtrl = {
     try {
       const email = req.body.email;
       const strid = req.body.strid;
-  
+
       const session = await GameSessions.findOne({ where: { strid: strid } });
-  
+
       if (session) {
         const opponent = await Users.findOne({ where: { email: email } });
         session.opponent_id = opponent.sn;
-  
+
         await session.save();
-  
+
         res.status(200).json({ success: true, message: strid });
       } else {
-        res.status(404).json({ success: false, message: 'Session not found' });
+        res.status(404).json({ success: false, message: "Session not found" });
       }
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
@@ -604,33 +644,37 @@ const gameSessionCtrl = {
       const email = req.body.email;
       const coins = parseFloat(req.body.coins);
       const winning = req.body.winning === true;
-  
+
       const user = await Users.findOne({ where: { email } });
       if (!user) {
-        return res.status(404).json({ success: false, message: 'User not found' });
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
       }
-  
+
       // const wallet = await Wallet.findOne({ where: { sn: user.sn }});
       // if (!wallet) {
       //   return res.status(404).json({ success: false, message: 'Wallet not found' });
       // }
-  
+
       user.balance += coins;
       await user.save();
-  
+
       if (winning) {
-        const jobigamesUser = await Users.findOne({ where: { email: 'info@jobigames.com' } });
+        const jobigamesUser = await Users.findOne({
+          where: { email: "info@jobigames.com" },
+        });
         if (jobigamesUser) {
           jobigamesUser.balance += 300;
           await jobigamesUser.save();
         }
       }
-  
-      res.status(200).json({ success: true, message: 'success' });
+
+      res.status(200).json({ success: true, message: "success" });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
     }
-  }
-}
+  },
+};
 
 module.exports = gameSessionCtrl;
