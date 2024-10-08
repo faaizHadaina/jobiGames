@@ -172,7 +172,7 @@ const giroService = {
         throw new Error("Failed to transfer funds");
       }
     } catch (error) {
-      throw new Error(error);
+      throw new Error(error.message);
       console.error(`Attempt failed:`, error.message);
     }
   },

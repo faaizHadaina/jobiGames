@@ -166,8 +166,9 @@ const authCtrl = {
         });
       }
     } catch (err) {
-      console.log(err.message);
+      //  console.log(err.message);
       return res.status(500).json({
+        ade: "she",
         message: err,
         success: false,
       });
