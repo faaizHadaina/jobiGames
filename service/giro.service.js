@@ -92,7 +92,7 @@ const giroService = {
         throw new Error("Failed to fetch wallet status");
       }
     } catch (error) {
-      return res.status(500).json({ message: error, success: false });
+      throw new Error(error);
     }
   },
 
