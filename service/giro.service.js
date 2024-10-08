@@ -133,7 +133,7 @@ const giroService = {
         throw new Error("Wallet Not Found");
       }
 
-      const url = `${process.env.GIRO_URL}/virtual-accounts/transfer`;
+      const url = `${process.env.GIRO_URL}/transactions/transfer`;
       const apiKey = process.env.GIRO_KEY;
 
       const headers = {
@@ -186,7 +186,7 @@ const giroService = {
         throw new Error("Wallet Not Found");
       }
 
-      const url = `${process.env.GIRO_URL}/virtual-accounts/transfer`;
+      const url = `${process.env.GIRO_URL}/transactions/transfer`;
       const apiKey = process.env.GIRO_KEY;
 
       const headers = {
