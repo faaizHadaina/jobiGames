@@ -15,7 +15,7 @@ const gameSessionCtrl = {
 
       const user = await Users.findOne({ where: { sn: user_id } });
       const giroWallet = await giroService.fetchVirtualAccount(user.ID);
-      const userWallet = await Wallet.findOne({ where: { sn: user.ID } });
+      const userWallet = await Wallet.findOne({ where: { publicId: user.ID } });
       if (!user) {
         return res
           .status(401)
