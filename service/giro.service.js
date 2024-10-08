@@ -148,7 +148,7 @@ const giroService = {
         destination: "vba-e41ea05c-2e62-4fa0-8b32-84894ee91dd3",
         sourceType: "VirtualAccount",
         source: userWallet.publicId,
-        amount: amount,
+        amount: amount * 100,
         narration: "Gaming",
         currency: "NGN",
       };
@@ -201,7 +201,7 @@ const giroService = {
         destination: userWallet.publicId,
         sourceType: "VirtualAccount",
         source: "vba-e41ea05c-2e62-4fa0-8b32-84894ee91dd3",
-        amount: amount,
+        amount: amount * 100,
         narration: "Winning",
         currency: "NGN",
       };
