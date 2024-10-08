@@ -47,7 +47,7 @@ const giroService = {
           currency: response.data.data.currency,
           user: user_sn,
           accountName: response.data.data.accountName,
-          balance: response.data.data.balance,
+          balance: 0,
           bankCode: response.data.data.bankCode,
           bankName: response.data.data.bankName,
           publicId: response.data.data.publicId,
@@ -84,7 +84,7 @@ const giroService = {
       const response = await axios.get(url, { headers });
 
       if (response.data.meta.statusCode === 200 && response.data.meta.success) {
-        userWallet.balance = response.data.data.balance;
+        userWallet.balance = response.data.data.balance / 100;
         await userWallet.save();
         return response.data.data;
       } else {
@@ -114,7 +114,7 @@ const giroService = {
       const response = await axios.get(url, { headers });
 
       if (response.data.meta.statusCode === 200 && response.data.meta.success) {
-        userWallet.balance = response.data.data.availableAmount;
+        userWallet.balance = response.data.data.availableAmount / 100;
         await userWallet.save();
       } else {
         throw new Error("Failed to fetch virtual balance");
