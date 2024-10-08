@@ -85,7 +85,6 @@ const giroService = {
 
       if (response.data.meta.statusCode === 200 && response.data.meta.success) {
         userWallet.balance = response.data.data.balance;
-        userWallet.status = response.data.data.status;
         await userWallet.save();
         return response.data.data;
       } else {
