@@ -61,7 +61,7 @@ const giroService = {
         throw new Error("Failed to create the account.");
       }
     } catch (error) {
-      console.error(`Attempt ${attempt} failed:`, error.message);
+      console.error(`Attempt failed:`, error.message);
     }
   },
 
@@ -92,7 +92,7 @@ const giroService = {
         throw new Error("Failed to fetch wallet status");
       }
     } catch (error) {
-      console.error(`Attempt ${attempt} failed:`, error.message);
+      console.error(`Attempt failed:`, error.message);
     }
   },
 
@@ -121,7 +121,7 @@ const giroService = {
         throw new Error("Failed to fetch virtual balance");
       }
     } catch (error) {
-      console.error(`Attempt ${attempt} failed:`, error.message);
+      console.error(`Attempt failed:`, error.message);
     }
   },
 
@@ -172,7 +172,7 @@ const giroService = {
         throw new Error("Failed to transfer funds");
       }
     } catch (error) {
-      console.error(`Attempt ${attempt} failed:`, error.message);
+      console.error(`Attempt failed:`, error.message);
     }
   },
 
@@ -209,7 +209,7 @@ const giroService = {
 
       return response;
     } catch (error) {
-      console.error(`Attempt ${attempt} failed:`, error.message);
+      console.error(`Attempt failed:`, error.message);
       throw new Error("Failed to transfer funds");
     }
   },
