@@ -399,6 +399,27 @@ const authCtrl = {
         user: profile,
         token: newToken,
       };
+      const wallet = await Wallet.findOne({ where: { publicId: user.ID } });
+
+      if (!wallet) {
+        try {
+          await giroService.createVirtualAccount(
+            user.fullname,
+            user.email,
+            user.phone,
+            user.ID,
+            user.sn
+          );
+          console.log("Virtual account created successfully");
+        } catch (error) {
+          console.error("Error creating virtual account:", error.message);
+        }
+      } else {
+        profile.balance = wallet.balance;
+        user.balance = wallet.balance;
+        user.save();
+        console.log("Wallet already exists for user:", user.sn);
+      }
 
       return res.status(200).json({
         ...result,
