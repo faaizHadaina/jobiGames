@@ -412,7 +412,7 @@ const authCtrl = {
           );
           console.log("Virtual account created successfully");
         } catch (error) {
-          console.error("Error creating virtual account:", error.message);
+          throw new Error("Error creating virtual account");
         }
       } else {
         profile.balance = wallet.balance;
