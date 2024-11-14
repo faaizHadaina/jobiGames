@@ -33,10 +33,10 @@ const giroService = {
       category: "secondary",
       currency: "NGN",
       emailAddress: email,
-      // mobile: {
-      //   phoneNumber: phone,
-      //   isoCode: "NG",
-      // },
+      mobile: {
+        phoneNumber: "08051234567",
+        isoCode: "NG",
+      },
     };
 
     const headers = {
