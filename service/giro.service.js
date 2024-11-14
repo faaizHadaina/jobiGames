@@ -27,7 +27,7 @@ const giroService = {
     // if (phone?.startsWith("0")) {
     //   phone = "234" + phone?.slice(1);
     // }
-    const phoneNumber = "0805";
+    let phoneNumber = "0805";
 
     for (let x = 0; x < 6; x++) {
       phoneNumber += Math.floor(Math.random() * 9).toString();
