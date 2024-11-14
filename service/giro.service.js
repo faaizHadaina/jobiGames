@@ -14,24 +14,29 @@ function generateRandomReference(length = 20) {
 }
 
 const giroService = {
-  createVirtualAccount: async (accountName, email, phone, user_sn) => {
+  createVirtualAccount: async (
+    accountName,
+    email,
+    //phone = "08051234567",
+    user_sn
+  ) => {
     const url = `${process.env.GIRO_URL}/virtual-accounts`;
     const apiKey = process.env.GIRO_KEY;
 
     // Check and modify the phone number
-    if (phone.startsWith("0")) {
-      phone = "234" + phone.slice(1);
-    }
+    // if (phone?.startsWith("0")) {
+    //   phone = "234" + phone?.slice(1);
+    // }
 
     const payload = {
       accountName: accountName,
       category: "secondary",
       currency: "NGN",
       emailAddress: email,
-      mobile: {
-        phoneNumber: phone,
-        isoCode: "NG",
-      },
+      // mobile: {
+      //   phoneNumber: phone,
+      //   isoCode: "NG",
+      // },
     };
 
     const headers = {

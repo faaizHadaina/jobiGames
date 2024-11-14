@@ -46,7 +46,7 @@ const authCtrl = {
         nick,
         sex,
         dob,
-        phone,
+        // phone,
         realmoney: false,
         dateadded: new Date().toString(),
       });
@@ -70,7 +70,7 @@ const authCtrl = {
       const giroUser = await giroService.createVirtualAccount(
         fullname,
         email,
-        phone,
+        // phone,
         createdUser.sn
       );
       createdUser.ID = giroUser.data.publicId;
@@ -136,7 +136,7 @@ const authCtrl = {
             await giroService.createVirtualAccount(
               user.fullname,
               user.email,
-              user.phone,
+              //  user.phone,
               user.ID,
               user.sn
             );
@@ -406,7 +406,7 @@ const authCtrl = {
           await giroService.createVirtualAccount(
             user.fullname,
             user.email,
-            user.phone,
+            // user.phone,
             user.ID,
             user.sn
           );
