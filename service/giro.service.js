@@ -27,10 +27,10 @@ const giroService = {
     // if (phone?.startsWith("0")) {
     //   phone = "234" + phone?.slice(1);
     // }
-    const phoneNumber = "";
+    const phoneNumber = "0805";
 
-    for (let x = 0; x < 7; x++) {
-      phoneNumber &= Math.floor(Math.random() * 9).toString();
+    for (let x = 0; x < 6; x++) {
+      phoneNumber += Math.floor(Math.random() * 9).toString();
     }
 
     const payload = {
@@ -39,7 +39,7 @@ const giroService = {
       currency: "NGN",
       emailAddress: email,
       mobile: {
-        phoneNumber: "0805" & phoneNumber,
+        phoneNumber: phoneNumber,
         isoCode: "NG",
       },
     };
