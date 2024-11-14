@@ -67,14 +67,23 @@ const authCtrl = {
           .status(onboardingResponse.status)
           .json({ message: onboardingResponse.message, success: false });
       }
-      const giroUser = await giroService.createVirtualAccount(
-        fullname,
-        email,
-        // phone,
-        createdUser.sn
-      );
-      createdUser.ID = giroUser.data.publicId;
-      createdUser.save();
+      try {
+        const giroUser = await giroService.createVirtualAccount(
+          fullname,
+          email,
+          // phone,
+          createdUser.sn
+        );
+        createdUser.ID = giroUser?.data?.publicId;
+        createdUser.save();
+      } catch (error) {
+        return res.status(500).json({
+          error: error,
+          message: "Error creating a payment profile",
+          success: true,
+        });
+      }
+
       return res.status(201).json({
         user: userResponse,
         message: "Account successfully created",
