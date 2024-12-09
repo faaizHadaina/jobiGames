@@ -433,11 +433,7 @@ const gameSessionCtrl = {
           .json({ message: "User Wallet Not Found", success: false });
       }
 
-      return res.status(200).json({
-        success: true,
-        message: giroWallet,
-      });
-      if (parseFloat(giroWallet.balance) < parseFloat(session.coin)) {
+      if (parseFloat(giroWallet.balance / 100) < parseFloat(session.coin)) {
         return res.status(400).json({
           success: false,
           message: "Insufficient balance to request a game session replay",
@@ -520,14 +516,16 @@ const gameSessionCtrl = {
         opponentWallet.publicId
       );
 
-      if (parseFloat(giroWallet.balance) < parseFloat(session.coin)) {
+      if (parseFloat(giroWallet.balance / 100) < parseFloat(session.coin)) {
         return res.status(400).json({
           success: false,
           message: "Insufficient balance to accept or restart the game session",
         });
       }
 
-      if (parseFloat(opponentGiroWallet.balance) < parseFloat(session.coin)) {
+      if (
+        parseFloat(opponentGiroWallet.balance / 100) < parseFloat(session.coin)
+      ) {
         return res.status(400).json({
           success: false,
           message:
