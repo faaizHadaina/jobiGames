@@ -384,6 +384,7 @@ const authCtrl = {
           success: false,
         });
       }
+      const giroWallet = await giroService.fetchVirtualAccount(user.ID);
 
       let newToken = jwt.sign(
         {
@@ -399,7 +400,7 @@ const authCtrl = {
         sn: user.sn,
         email: user.email,
         name: user.fullname,
-        balance: user.balance,
+        balance: giroWallet?.balance,
         nick: user.nick,
         isEmailVerified: user.isEmailVerified,
       };
