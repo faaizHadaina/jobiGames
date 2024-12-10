@@ -400,7 +400,7 @@ const authCtrl = {
         sn: user.sn,
         email: user.email,
         name: user.fullname,
-        balance: giroWallet?.balance,
+        balance: giroWallet?.balance / 100,
         nick: user.nick,
         isEmailVerified: user.isEmailVerified,
       };
