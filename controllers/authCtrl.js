@@ -100,7 +100,15 @@ const authCtrl = {
 
   login: async (req, res, next) => {
     try {
-      const { email, password } = req.body;
+      const { email, password, appVersion = 0 } = req.body;
+      const serverVersion = 1;
+      if (appVersion < serverVersion) {
+        return res.status(404).json({
+          message: "App is obsolete, please update your app to login",
+          email: "App is obsolete, please update your app to login",
+          success: false,
+        });
+      }
       const user = await Users.findOne({ where: { email } });
       if (!user) {
         return res.status(404).json({
