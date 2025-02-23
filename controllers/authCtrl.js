@@ -112,8 +112,7 @@ const authCtrl = {
       const user = await Users.findOne({ where: { email } });
       if (!user) {
         return res.status(404).json({
-          message: "Failed login attempt",
-          email: "Incorrect credentials",
+          message: "Incorrect password or email",
           success: false,
         });
       }
@@ -175,8 +174,7 @@ const authCtrl = {
         });
       } else {
         return res.status(403).json({
-          message: "Failed login attempt",
-          email: "Incorrect password or email",
+          message: "Incorrect password or email",
           success: false,
         });
       }
